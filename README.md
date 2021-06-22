@@ -10,7 +10,6 @@ These document is based on HIPERFACE Specification for motor control feedback, T
 
 ```
 //ENCODER VARIABLES
-const float a=32767.0f;
 int indexx;
 long int interp;
 long int XY;
