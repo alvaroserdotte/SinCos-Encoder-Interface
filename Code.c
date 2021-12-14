@@ -1,32 +1,31 @@
 //ENCODER VARIABLES
-const float a=32767.0f;
-int indexx;
-long int interp;
-long int XY;
-long int t;
-int Sin,Cos,X,Y,A;
-uint16_t B,B2,B3;
-long int tits;
-int octant,octant2;
 
-extern float Error_d,SP_d,Pterm_d,Pterm2_d,Iterm_d,Iterm2_d;
-extern float Error_q,SP_q,Pterm_q,Pterm2_q,Iterm_q,Iterm2_q;
-extern float thetaSum,theta_eSum;
-long int thetaI,Turns,Theta_Turns;
-float theta,theta2,theta_e,AbsTheta,AbsTheta2;
-int Sa,Ca,S,C;
+int indexx;						//Interpolation index variable
+long int interp;					//Interpolation calc
+int A;							//Input for the interpolation function
+int Sin,Cos;						//Angle sector calculation
+int X,Y;						//Angle sector calculation
+long int XY;						//Angle sector calculation
+int Sa,Ca,S,C;						//Quadrature calculation, like a normal pulsed encoder
+long int thetaI,Turns,Theta_Turns;			//Multi turn calculation
+uint16_t B,B2,B3;					//Multi turn calculation
+long int tets;						//Multi turn calculation
+float theta,theta2,theta_e,AbsTheta,AbsTheta2;		//Multi turn calculation	
+int octant,octant2;					//Angle octant 
+long int T,T2,temps;
+
+
+
+//Analog acquisition inside the ADC OnEnd interruption function (not showed here) saves in Sin and Cos variables and run Enc_Process()
+
+
 
 int ATAN_Table[33] = 
 {
 58,331,653,976,1298,1617,1934,2247,2555,2860,3159,3453,3742,4025,4301,4572,
 4836,5093,5344,5588,5826,6057,6282,6500,6712,6917,7116,7310,7497,7679,7855,8026,8192
 };
-//
-//
-//Analog acquisition and saves in Sin and Cos int variables
-//Run Enc_Process();
 
-//
 void Atan_interp(void) //ArcTan interpolation
 {
 	indexx = A/1024;//(A>>10 );
@@ -36,6 +35,7 @@ void Atan_interp(void) //ArcTan interpolation
 	A = interp/1024;
 	A = A + ATAN_Table[indexx];
 }
+
 void Enc_Process(void)
 {
 	
@@ -44,7 +44,8 @@ if (Sin >= 0)
 	S = 1;
 	if (Cos >= 0) {
 		C = 1;
-		if (Sin < Cos) 	{ 	//octant = 0;
+		if (Sin < Cos) 	{ 	
+			octant = 0;
 			X = Sin;
 			Y = Cos;
 			XY = 32767*X;
@@ -53,7 +54,8 @@ if (Sin >= 0)
 			Atan_interp();
 			B = A + 0;
 		}
-		else {		 	//octant = 1;
+		else {		 	
+			octant = 1;
 			X = Cos;
 			Y = Sin;
 			XY = 32767*X;
@@ -65,7 +67,8 @@ if (Sin >= 0)
 	}
 	else { //Sin>0 e Cos <0 
 		C = 0;
-		if (Sin <= -Cos) { 	//octant = 3;
+		if (Sin <= -Cos) { 	
+			octant = 3;
 			X = Sin;
 			Y = -Cos;
 			XY = 32767*X;
@@ -74,7 +77,8 @@ if (Sin >= 0)
 			Atan_interp();
 			B = 32767 - A;
 		}
-		else {			//octant = 2;
+		else {			
+			octant = 2;
 			X = -Cos;
 			Y = Sin;
 			XY = 32767*X;
@@ -89,7 +93,8 @@ else {
 	S = 0;
 	if (Cos >= 0) {	//Sin<0 e Cos>0
 		C = 1;
-		if (-Sin <= Cos) {	//octant = 7;
+		if (-Sin <= Cos) {	
+			octant = 7;
 			X = -Sin;
 			Y = Cos;
 			XY = 32767*X;
@@ -98,8 +103,8 @@ else {
 			Atan_interp();
 			B = 32767 + 32767 - A;
 		}
-		else {			//octant = 6;
-			
+		else {			
+			octant = 6;
 			X = Cos;
 			Y = -Sin;
 			XY = 32767*X;
@@ -111,7 +116,8 @@ else {
 	}
 	else { //Sin<0 e Cos<00
 		C = 0;
-		if (-Sin < -Cos) {	//octant = 4;
+		if (-Sin < -Cos) {	
+			octant = 4;
 			X = -Sin;
 			Y = -Cos;
 			XY = 32767*X;
@@ -120,7 +126,8 @@ else {
 			Atan_interp();
 			B = 32767 + A;
 		}
-		else 	{		//octant = 5;
+		else 	{		
+			octant = 5;
 			X = -Cos;
 			Y = -Sin;
 			XY = 32767*X;
@@ -171,7 +178,7 @@ else {
 	theta = theta2;///(2607.59458f);			//Angulação mecanica de 0 a 2pi ; 1 volta mecanica
 	
 	//Calculo theta absoluto
-		long int T,T2,temps;
+		
 		tets = (Theta_Turns);///4;
 	
 		if (tets < 0) {
